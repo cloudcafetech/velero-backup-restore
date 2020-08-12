@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    velero.io/change-storage-class: RestoreItemAction
+    velero.io/plugin-config: ""
+  name: change-storage-class-cm
+  namespace: velero
+data:
+  #<old-storage-class>: <new-storage-class>
+  kubenfs-storage: rkenfs-storage
+

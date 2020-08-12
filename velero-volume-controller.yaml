@@ -1,0 +1,73 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: leaselock
+  namespace: velero
+rules:
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["create", "get", "watch", "list", "delete", "patch", "update"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["create", "get", "watch", "list", "delete", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: velero-volume-controller
+subjects:
+  - kind: ServiceAccount
+    name: default # Name is case sensitive
+    namespace: velero
+roleRef:
+  kind: ClusterRole #this must be Role or ClusterRole
+  name: leaselock
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: velero-volume-controller
+  namespace: velero
+data:
+  config.yml: |
+    clusterServerCfg:
+      masterURL:
+      kubeConfig:
+      leaseLockNamespace: velero
+      leaseLockName: velero-volume-controller
+    veleroVolumeCfg:
+      includeNamespaces:
+      excludeNamespaces: kube-system,velero
+      includeVolumeTypes: persistentVolumeClaim
+      excludeVolumeTypes:
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: velero-volume-controller
+  namespace: velero
+  labels:
+    app: velero-volume-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: velero-volume-controller
+  template:
+    metadata:
+      labels:
+        app: velero-volume-controller
+    spec:
+      containers:
+      - name: velero-volume-controller
+        image: prasenforu/velero-volume-controller:v2.0
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: config
+            mountPath: /velero-volume-controller/examples
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: velero-volume-controller

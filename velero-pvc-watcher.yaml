@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/name: velero-pvc-watcher
+  name: velero-pvc-watcher
+  namespace: velero
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: velero-pvc-watcher
+  name: velero-pvc-watcher
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - list
+  - watch
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: velero-pvc-watcher
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: velero-pvc-watcher
+subjects:
+- kind: ServiceAccount
+  name: velero-pvc-watcher
+  namespace: velero
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/path: /metrics
+    prometheus.io/port: "2112"
+    prometheus.io/scrape: "true"
+  labels:
+    app.kubernetes.io/name: velero-pvc-watcher
+  name: velero-pvc-watcher
+  namespace: velero
+spec:
+  ports:
+  - name: http
+    port: 2112
+    protocol: TCP
+    targetPort: http
+  selector:    
+    app.kubernetes.io/name: velero-pvc-watcher
+  type: ClusterIP
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: velero-pvc-watcher
+  name: velero-pvc-watcher
+  namespace: velero
+spec:
+  replicas: 1
+  selector:
+    matchLabels:      
+      app.kubernetes.io/name: velero-pvc-watcher
+  template:
+    metadata:
+      labels:        
+        app.kubernetes.io/name: velero-pvc-watcher
+    spec:
+      containers:
+      - env:
+        - name: METRICSPATH
+          value: /metrics
+        - name: PORT
+          value: "2112"
+        - name: EXCLUDEANNOTATION
+          value: backup.velero.io/backup-volumes-excludes
+        - name: BACKUPANNOTATION
+          value: backup.velero.io/backup-volumes
+        image: bitsbeats/velero-pvc-watcher:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /metrics
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: velero-pvc-watcher
+        ports:
+        - containerPort: 2112
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /metrics
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: velero-pvc-watcher
+      serviceAccountName: velero-pvc-watcher
+      terminationGracePeriodSeconds: 30
