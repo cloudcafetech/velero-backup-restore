@@ -31,7 +31,7 @@ Before we deploy velero into our Kubernetes cluster, we'll first create velero's
 cat <<EOF > credentials-velero
 [default]
 aws_access_key_id = admin
-aws_secret_access_key = bappa2675
+aws_secret_access_key = admin2675
 EOF
 ```
 
@@ -130,7 +130,7 @@ Please create ```velero-cluster1``` bucket inside minio & and change policy with
 OR use command line tool.
 
 ```
-MinIO=10.128.0.5
+MinIO=10.128.0.9
 wget https://dl.min.io/client/mc/release/linux-amd64/mc; chmod +x mc; mv -v mc /usr/local/bin/mc
 mc config host add minio1 https://$MinIO admin bappa2675 --insecure
 mc mb minio1/velero-cluster1 --insecure
@@ -142,7 +142,7 @@ It will produce output all of the .yaml files used to create the Velero deployme
 - For non secured (http)
 
 ```
-MinIO=10.128.0.5
+MinIO=10.128.0.9
 velero install \
     --provider aws \
     --bucket velero-cluster1 \
