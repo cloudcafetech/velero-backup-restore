@@ -61,36 +61,15 @@ docker run -d -p 9000:9000 --restart=always --name minio1 \
 - Create Self-sign certificate.
 
 ```
-cat > openssl.conf << EOF
-
-[req]
-distinguished_name = req_distinguished_name
-x509_extensions = v3_req
-prompt = no
-
-[req_distinguished_name]
-C  = IN
-ST = WestBengal
-L  = Kolkata
-O  = Cloud Cafe
-CN = Minio Certificate
-
-[v3_req]
-subjectAltName = @alt_names
-
-[alt_names]
-IP.1 = 10.128.0.9
-
-EOF
-
-openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout private.key -out public.crt -config openssl.conf
+wget https://raw.githubusercontent.com/cloudcafetech/velero-backup-restore/master/create-cert.sh; chmod +x create-cert.sh
+./create-cert.sh
 ```
 
 - Create folders
 
 ```
 mkdir -p /root/minio/data
-mkdir -p /root/minio/config/certs
+mkdir -p /root/minio/config/CAs
 
 chcon -Rt svirt_sandbox_file_t /root/minio/data
 chcon -Rt svirt_sandbox_file_t /root/minio/config
@@ -99,19 +78,19 @@ chcon -Rt svirt_sandbox_file_t /root/minio/config
 - Copy certificate to minio certficate folder
 
 ```
-cp private.key /root/minio/config/certs/private.key
-cp public.crt /root/minio/config/certs/public.crt
+cp $HOME/tls/public.crt $HOME/tls/private.key /root/minio/config/
+cp $HOME/tls/rootCA.pem /root/minio/config/CAs/
 ```
 
 - Start MinIO docker container 
 
 ```
 docker run -d -p 443:443 --restart=always --name minio1 \
+  -v /root/minio/config:/root/.minio \
+  -v /root/minio/data:/data \
   -e "MINIO_ACCESS_KEY=admin" \
   -e "MINIO_SECRET_KEY=bappa2675" \
-  -v /root/minio/data:/data \
-  -v /root/minio/config:/root/.minio \
-  minio/minio server --address ":443" /data
+  minio/minio server --certs-dir=/root/.minio --address ":443" /data
 ```
 
 ### Step #4 Login MinIO
