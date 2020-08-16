@@ -50,7 +50,7 @@ chcon -Rt svirt_sandbox_file_t /root/minio/config
 
 docker run -d -p 9000:9000 --restart=always --name minio1 \
   -e "MINIO_ACCESS_KEY=admin" \
-  -e "MINIO_SECRET_KEY=bappa2675" \
+  -e "MINIO_SECRET_KEY=admin2675" \
   -v /root/minio/data:/data \
   -v /root/minio/config:/root/.minio \
   minio/minio server /data
@@ -89,7 +89,7 @@ docker run -d -p 443:443 --restart=always --name minio1 \
   -v /root/minio/config:/root/.minio \
   -v /root/minio/data:/data \
   -e "MINIO_ACCESS_KEY=admin" \
-  -e "MINIO_SECRET_KEY=bappa2675" \
+  -e "MINIO_SECRET_KEY=admin2675" \
   minio/minio server --certs-dir=/root/.minio --address ":443" /data
 ```
 
@@ -137,6 +137,26 @@ velero install \
 - For secured (https)
 
 ```
+# Generate private key for CA cert
+openssl genrsa -out rootCA.key 4096
+
+# Generate public key (certificate) for the CA
+
+COUNTRY=IN
+STATE=WestBengal
+LOCALITY=Kolkata
+ORG="Cloud Cafe"
+
+openssl req \
+  -x509 \
+  -new \
+  -sha256 \
+  -days 1825 \
+  -nodes \
+  -subj "/C=$COUNTRY/ST=$STATE/L=$LOCALITY/O=$ORG" \
+  -keyout rootCA.key \
+  -out rootCA.pem
+
 MinIO=10.128.0.9
 velero install \
     --provider aws \
@@ -146,7 +166,7 @@ velero install \
     --secret-file ./credentials-velero \
     --use-volume-snapshots=true \
     --backup-location-config region=minio,s3ForcePathStyle="true",s3Url=https://$MinIO,insecureSkipTLSVerify="true" \
-    --cacert ./public.crt \
+    --cacert rootCA.pem \
     --snapshot-location-config region=minio \
     --dry-run -o yaml
 ```
