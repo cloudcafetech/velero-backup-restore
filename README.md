@@ -4,38 +4,10 @@ Velero is a convenient backup tool for Kubernetes clusters that compresses and b
 
 ## Note: as of now do not use secured (https) setup, not able to success with volume backup with selfsign sertificate
  
-## Installation
+## Minio Installation
+MinIO is a High Performance Object Storage. It is API compatible with Amazon S3 cloud storage service. Use MinIO to build high performance infrastructure for machine learning, analytics and application data workloads.
 
-The Velero backup tool consists of a client installed on your local computer and a server that runs in your Kubernetes cluster. To begin, we'll install the local velero client.
-
-### Step #1 Download packege
-
-- Find release version
-
-https://github.com/vmware-tanzu/velero/releases
-
-- Download packege with wget
-
-```
-ver=v1.4.2
-wget https://github.com/vmware-tanzu/velero/releases/download/$ver/velero-$ver-linux-amd64.tar.gz
-tar -xvzf velero-$ver-linux-amd64.tar.gz
-mv -v velero-$ver-linux-amd64/velero /usr/local/bin/velero
-```
-
-### Step #2 Create secrets
-
-Before we deploy velero into our Kubernetes cluster, we'll first create velero's prerequisite objects. 
-
-```
-cat <<EOF > credentials-velero
-[default]
-aws_access_key_id = admin
-aws_secret_access_key = admin2675
-EOF
-```
-
-### Step #3 Create backup location
+### Step #1 Create backup location
 
 First you need to create backup location, it could be any cloud provider object storage location. But here I am going to use on-prem storage location. ```MinIO``` is one of opensource tool which help us to create object storage like AWS S3. To setup ```MinIO``` use following steps. Before execute below command make sure docker is installed in host.
 
@@ -93,7 +65,7 @@ docker run -d -p 443:443 --restart=always --name minio1 \
   minio/minio server --certs-dir=/root/.minio --address ":443" /data
 ```
 
-### Step #4 Login MinIO
+### Step #2 Login MinIO
 Now you can access MinIO using ```MINIO_ACCESS_KEY``` & ```MINIO_SECRET_KEY```.
 
 - For non secured (http)
@@ -102,7 +74,7 @@ http://server-ip:9000
 - For secured (https)
 https://server-ip
  
-### Step #5 Create Bucket in MinIO
+### Step #3 Create Bucket in MinIO
 
 Please create ```velero-cluster1``` bucket inside minio & and change policy with read & write also please do remember bucket name.
 
@@ -115,7 +87,36 @@ mc config host add minio1 https://$MinIO admin bappa2675 --insecure
 mc mb minio1/velero-cluster1 --insecure
 ```
 
-### Step #6 Start deployment
+## Velero Setup in Kubernetes
+
+### Step #1 Download packege
+
+- Find release version
+
+https://github.com/vmware-tanzu/velero/releases
+
+- Download packege with wget
+
+```
+ver=v1.4.2
+wget https://github.com/vmware-tanzu/velero/releases/download/$ver/velero-$ver-linux-amd64.tar.gz
+tar -xvzf velero-$ver-linux-amd64.tar.gz
+mv -v velero-$ver-linux-amd64/velero /usr/local/bin/velero
+```
+
+### Step #2 Create secrets
+
+Before we deploy velero into our Kubernetes cluster, we'll first create velero's prerequisite objects. 
+
+```
+cat <<EOF > credentials-velero
+[default]
+aws_access_key_id = admin
+aws_secret_access_key = admin2675
+EOF
+```
+
+### Step #3 Start deployment
 It will produce output all of the .yaml files used to create the Velero deployment. Remove ```--dry-run -o yaml``` to run directly.
 
 - For non secured (http)
@@ -137,25 +138,8 @@ velero install \
 - For secured (https)
 
 ```
-# Generate private key for CA cert
-openssl genrsa -out rootCA.key 4096
-
 # Generate public key (certificate) for the CA
 
-COUNTRY=IN
-STATE=WestBengal
-LOCALITY=Kolkata
-ORG="Cloud Cafe"
-
-openssl req \
-  -x509 \
-  -new \
-  -sha256 \
-  -days 1825 \
-  -nodes \
-  -subj "/C=$COUNTRY/ST=$STATE/L=$LOCALITY/O=$ORG" \
-  -keyout rootCA.key \
-  -out rootCA.pem
 
 MinIO=10.128.0.9
 velero install \
@@ -173,7 +157,7 @@ velero install \
 
 #### Note: The velero install command creates a set of CRDs that power the Velero service.
 
-### Step #7 Verification
+### Step #4 Verification
 After the installation is complete, you can verify that you have number of restic-xxx pods based on your numbers of nodes and 1 velero-xxx pod deployed in the velero namespace. As the restic service is deployed as a daemonset.
 
 ```
