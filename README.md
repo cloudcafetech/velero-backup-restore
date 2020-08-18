@@ -158,7 +158,12 @@ velero install \
 
 #### Note: The velero install command creates a set of CRDs that power the Velero service.
 
-### Step #4 Verification
+### Step #5 Adding backup annotation to pods with volumes automatically
+After the installation is co
+
+```kubectl create -f https://raw.githubusercontent.com/cloudcafetech/velero-backup-restore/master/velero-volume-controller.yaml```
+
+### Step #5 Verification
 After the installation is complete, you can verify that you have number of restic-xxx pods based on your numbers of nodes and 1 velero-xxx pod deployed in the velero namespace. As the restic service is deployed as a daemonset.
 
 ```
