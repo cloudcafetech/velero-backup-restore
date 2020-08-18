@@ -65,6 +65,10 @@ docker run -d -p 443:443 --restart=always --name minio1 \
   minio/minio server --certs-dir=/root/.minio --address ":443" /data
 ```
 
+- Copy rootCA.pem from Minio server to Kubernetes server
+
+```scp -i ```
+
 ### Step #2 Login MinIO
 Now you can access MinIO using ```MINIO_ACCESS_KEY``` & ```MINIO_SECRET_KEY```.
 
@@ -139,7 +143,7 @@ velero install \
 - For secured (https)
 
 ```
-# Generate public key (certificate) for the CA
+# Copy rootCA.pem from Minio server to Kubernetes server
 
 
 MinIO=10.128.0.9
