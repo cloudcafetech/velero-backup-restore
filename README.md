@@ -163,7 +163,7 @@ Add backup annotation to pods with volumes automatically
 
 ```kubectl create -f https://raw.githubusercontent.com/cloudcafetech/velero-backup-restore/master/velero-volume-controller.yaml```
 
-### Step #5 Verification
+### Step #6 Verification
 After the installation is complete, you can verify that you have number of restic-xxx pods based on your numbers of nodes and 1 velero-xxx pod deployed in the velero namespace. As the restic service is deployed as a daemonset.
 
 ```
