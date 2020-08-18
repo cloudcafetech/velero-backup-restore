@@ -158,8 +158,8 @@ velero install \
 
 #### Note: The velero install command creates a set of CRDs that power the Velero service.
 
-### Step #5 Adding backup annotation to pods with volumes automatically
-After the installation is co
+### Step #5 Add backup annotation to pods with volumes automatically
+Add backup annotation to pods with volumes automatically
 
 ```kubectl create -f https://raw.githubusercontent.com/cloudcafetech/velero-backup-restore/master/velero-volume-controller.yaml```
 
