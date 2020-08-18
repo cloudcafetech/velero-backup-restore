@@ -88,6 +88,7 @@ mc mb minio1/velero-cluster1 --insecure
 ```
 
 ## Velero Setup in Kubernetes
+The Velero backup tool consists of a client installed on your local computer and a server that runs in your Kubernetes cluster. To begin, we'll install the local velero client.
 
 ### Step #1 Download packege
 
