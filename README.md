@@ -185,6 +185,13 @@ kubectl create -f change-storage-class-cm.yaml
 
 ### BACKUP:
 
+- Download backup script and run.
+
+```
+wget https://raw.githubusercontent.com/cloudcafetech/velero-backup-restore/master/backup.sh; chmod +x backup.sh
+./backup.sh <kube-cluster> <namespace>
+```
+
 To backup volumes with Restic, Velero ask to make an annotation on the pods ```backup.velero.io/backup-volumes=<Volume Name>```
 This annotation need to be written in the application deployment yaml file, in ```spec.template.metadata.annotations```
 
