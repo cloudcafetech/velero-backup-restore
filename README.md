@@ -2,8 +2,6 @@
 
 Velero is a convenient backup tool for Kubernetes clusters that compresses and backs up Kubernetes objects to object storage. It also takes snapshots of your cluster's Persistent Volumes using your cloud provider's block storage snapshot features, and can then restore your cluster's objects and Persistent Volumes to a previous state.
 
-## Note: as of now do not use secured (https) setup, not able to success with volume backup with selfsign sertificate
- 
 ## Minio Installation
 MinIO is a High Performance Object Storage. It is API compatible with Amazon S3 cloud storage service. Use MinIO to build high performance infrastructure for machine learning, analytics and application data workloads.
 
@@ -67,7 +65,7 @@ docker run -d -p 443:443 --restart=always --name minio1 \
 
 - Copy rootCA.pem from Minio server to Kubernetes server
 
-```scp -i ```
+```scp -i <PEM file PATH> minio/config/CAs/rootCA.pem centos@<Kubentes Master IP>:/home/centos/ ```
 
 ### Step #2 Login MinIO
 Now you can access MinIO using ```MINIO_ACCESS_KEY``` & ```MINIO_SECRET_KEY```.
@@ -143,8 +141,9 @@ velero install \
 - For secured (https)
 
 ```
-# Copy rootCA.pem from Minio server to Kubernetes server
+# Copy rootCA.pem from Kubernetes server centos home folder
 
+cp /home/centos/rootCA.pem .
 
 MinIO=10.128.0.9
 velero install \
