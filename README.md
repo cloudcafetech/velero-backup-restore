@@ -85,7 +85,7 @@ OR use command line tool.
 ```
 MinIO=10.128.0.9
 wget https://dl.min.io/client/mc/release/linux-amd64/mc; chmod +x mc; mv -v mc /usr/local/bin/mc
-mc config host add minio1 https://$MinIO admin bappa2675 --insecure
+mc config host add minio1 https://$MinIO admin admin2675 --insecure
 mc mb minio1/velero-cluster1 --insecure
 ```
 
