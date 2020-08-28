@@ -161,6 +161,12 @@ velero install \
 
 #### Note: The velero install command creates a set of CRDs that power the Velero service.
 
+### Step #4 Patching deployment and daemonset with Linux host node selector
+```
+kubectl patch deploy velero -n velero --type merge -p '{"spec": {"template": {"spec": {"nodeSelector": {"beta.kubernetes.io/os": "linux"}}}}}'
+kubectl patch ds restic -n velero --type merge -p '{"spec": {"template": {"spec": {"nodeSelector": {"beta.kubernetes.io/os": "linux"}}}}}'
+```
+
 ### Step #5 Add backup volumes automatically
 Add backup annotation to pods with volumes automatically
 
