@@ -18,12 +18,12 @@ mkdir -p /root/minio/config
 chcon -Rt svirt_sandbox_file_t /root/minio/data
 chcon -Rt svirt_sandbox_file_t /root/minio/config
 
-docker run -d -p 9000:9000 --restart=always --name minio1 \
+docker run -d -p 9000:9000 -p 9001:9001 --restart=always --name minio \
   -e "MINIO_ACCESS_KEY=admin" \
   -e "MINIO_SECRET_KEY=admin2675" \
   -v /root/minio/data:/data \
   -v /root/minio/config:/root/.minio \
-  minio/minio server /data
+  minio/minio server /data --console-address ":9001"
 ```
 
 #### Secure (https) MinIO
